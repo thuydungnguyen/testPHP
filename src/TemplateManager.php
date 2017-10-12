@@ -15,16 +15,9 @@ class TemplateManager
         return $replaced;
     }
 
-    private function debug($var)
-    {
-        echo '<pre>';
-        print_r($var);
-        echo '</pre>';
-    }
-
     private function computeText($text, array $data)
     {
-        $APPLICATION_CONTEXT = ApplicationContext::getInstance();
+
 
         $quote = (isset($data['quote']) && $data['quote'] instanceof Quote) ? $data['quote'] : null;
 
@@ -50,9 +43,8 @@ class TemplateManager
          * USER
          * [user:*]
          */
-        $_user  = (isset($data['user'])  and ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
-        if($_user) {
-            (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
+        if(strpos($text, '[user:first_name]') !== false){
+            $text = self::computeUser($text, $data);
         }
 
         return $text;
@@ -81,5 +73,16 @@ class TemplateManager
         $destination = DestinationRepository::getInstance()->getById($quote->destinationId);
 
         return str_replace('[quote:destination_link]', $usefulObject->url . '/' . $destination->countryName . '/quote/' . $_quoteFromRepository->id, $text);
+    }
+
+    private static function computeUser($text, array $data)
+    {
+        $APPLICATION_CONTEXT = ApplicationContext::getInstance();
+        $user  = (isset($data['user']) && ($data['user']  instanceof User))  ? $data['user']  : $APPLICATION_CONTEXT->getCurrentUser();
+        if($user) {
+            $text = str_replace('[user:first_name]',ucfirst(mb_strtolower($user->firstname)),$text);
+        }
+
+        return $text;
     }
 }
