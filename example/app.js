@@ -2,20 +2,29 @@ $( document ).ready(function() {
     var module = (function(){
         var self = {};
 
-        self.text = $('#calc_occurence').text().split(' ');
-        self.tableOfOccurence = {};
-
         self.calcOccurence = function() {
-            $.each(self.text, function(index, item) {
-                if(item.length >= 2) {
-                    if(self.tableOfOccurence[item] == null){
-                        self.tableOfOccurence[item] = 1;
+            text = $('#calc_occurence').text().split(' ');
+            tableOfOccurence = {};
+
+            $.each(text, function(index, word) {
+                if(word.length >= 2) {
+                    if(tableOfOccurence[word] == null){
+                        tableOfOccurence[word] = 1;
                     }else{
-                        self.tableOfOccurence[item] += 1;
+                        tableOfOccurence[word] += 1;
                     }
                 }
             });
-            console.log(self.tableOfOccurence);
+
+            tableLine = '';
+            htmlTable = $('#occurence-table').find('tbody');
+
+            for (var word in tableOfOccurence){
+                tableLine += '<tr><td>'+ word + '</td><td>' + tableOfOccurence[word] + '</td></tr>';
+            }
+            htmlTable.append(tableLine);
+
+            console.log(tableOfOccurence);
         };
 
         return self;
