@@ -15,11 +15,18 @@ class TemplateManager
         return $replaced;
     }
 
+    private function debug($var)
+    {
+        echo '<pre>';
+        print_r($var);
+        echo '</pre>';
+    }
+
     private function computeText($text, array $data)
     {
         $APPLICATION_CONTEXT = ApplicationContext::getInstance();
 
-        $quote = (isset($data['quote']) and $data['quote'] instanceof Quote) ? $data['quote'] : null;
+        $quote = (isset($data['quote']) && $data['quote'] instanceof Quote) ? $data['quote'] : null;
 
         if ($quote)
         {
@@ -35,20 +42,7 @@ class TemplateManager
             $containsSummary     = strpos($text, '[quote:summary]');
 
             if ($containsSummaryHtml !== false || $containsSummary !== false) {
-                if ($containsSummaryHtml !== false) {
-                    $text = str_replace(
-                        '[quote:summary_html]',
-                        Quote::renderHtml($_quoteFromRepository),
-                        $text
-                    );
-                }
-                if ($containsSummary !== false) {
-                    $text = str_replace(
-                        '[quote:summary]',
-                        Quote::renderText($_quoteFromRepository),
-                        $text
-                    );
-                }
+                $text = self::computeSummary($text, $quote);
             }
 
             (strpos($text, '[quote:destination_name]') !== false) and $text = str_replace('[quote:destination_name]',$destinationOfQuote->countryName,$text);
@@ -67,6 +61,16 @@ class TemplateManager
         if($_user) {
             (strpos($text, '[user:first_name]') !== false) and $text = str_replace('[user:first_name]'       , ucfirst(mb_strtolower($_user->firstname)), $text);
         }
+
+        return $text;
+    }
+
+    private static function computeSummary($text, Quote $quote)
+    {
+        $_quoteFromRepository = QuoteRepository::getInstance()->getById($quote->id);
+
+        $text = str_replace('[quote:summary_html]', Quote::renderHtml($_quoteFromRepository), $text);
+        $text = str_replace('[quote:summary]', Quote::renderText($_quoteFromRepository), $text);
 
         return $text;
     }
